@@ -1,0 +1,17 @@
+{
+  "name": "learning_rust",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/app",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer"
+      ],
+      "settings": {
+        "rust-analyzer.check.command": "clippy"
+      }
+    }
+  },
+  "postCreateCommand": "rustup component add rust-src rust-analyzer clippy"
+}

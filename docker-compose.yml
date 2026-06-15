@@ -1,0 +1,14 @@
+services:
+  app:
+    image: rust:1.96-slim
+    container_name: learning_rust
+    working_dir: /app
+    volumes:
+      - .:/app
+      - cargo-registry:/usr/local/cargo/registry
+      - target-cache:/app/target
+    command: sleep infinity
+
+volumes:
+  cargo-registry:
+  target-cache:
