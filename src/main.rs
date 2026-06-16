@@ -1,9 +1,8 @@
-mod error;
-mod lexer;
 mod share;
+mod vm;
 
 use crate::share::code::CODE;
-use crate::lexer::lexer::Lexer;
+use crate::vm::lexer::lexer::Lexer;
 
 fn main() {
     *CODE.write().unwrap() = b"1.43 + 1.43 - >=  = == <= > 1..2".to_vec();

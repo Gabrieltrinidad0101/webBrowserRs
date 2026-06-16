@@ -9,6 +9,6 @@ RUN cargo build --release
 FROM debian:bookworm-slim
 
 WORKDIR /app
-COPY --from=builder /app/target/release/learning_rust .
+COPY --from=builder /app/target/release/webbrowser .
 
 CMD ["sleep","infinity"]

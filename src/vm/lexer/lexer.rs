@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 
 use crate::share::code::CODE;
-use crate::error::error::{CustomError, ErrorKind, error};
+use crate::vm::error::error::{CustomError, ErrorKind, error};
 
 #[derive(Debug)]
 enum TOKENS {
