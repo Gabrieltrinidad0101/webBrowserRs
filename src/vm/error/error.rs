@@ -4,7 +4,8 @@ use crate::share::code::CODE;
 pub enum ErrorKind {
     Dot,
     UnexpectedChar,
-    IllegalCharacter
+    IllegalCharacter,
+    IllegalSyntax
 }
 
 #[derive(Debug)]
@@ -18,7 +19,8 @@ pub fn error(kind: ErrorKind, ln: usize, col: usize, idx: usize, len: usize) -> 
     let message = match kind {
         ErrorKind::Dot            => "A number cannot have two dots",
         ErrorKind::UnexpectedChar => "Unexpected character",
-        ErrorKind::IllegalCharacter => "Illegal character"
+        ErrorKind::IllegalCharacter => "Illegal character",
+        ErrorKind::IllegalSyntax => "Illegal Syntax"
     };
     let error = format!("\n{}{}", " ".repeat(col -1), "^".repeat(len));
     let code = CODE.read().unwrap();

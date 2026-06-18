@@ -1,4 +1,6 @@
-use crate::vm::lexer::lexer::TOKEN;
+use crate::vm::lexer::lexer::TOKENS;
+use crate::vm::lexer::lexer::Token;
+use crate::vm::error::error::{CustomError,ErrorKind, error};
 
 
 struct NodeNumber {
@@ -7,64 +9,97 @@ struct NodeNumber {
     value: String
 }
 
-
-struct BinOP {
-    left: NodeNumber,
-    rigth: NodeNumber,
-    op: String
+#[derive(Debug)]
+pub enum Expr {
+    BinOP {
+        left: Box<Expr>,
+        rigth: Box<Expr>,
+        op: TOKENS,
+    },
+    Number {
+        ln: usize,
+        col: usize,
+        value: String
+    }
 }
 
 
-struct Parser {
-    index: 0,
-    tokens: vec<TOKEN>
+pub struct Parser {
+    index: usize,
+    tokens: Vec<Token>
 }
 
 impl Parser {
 
-    fn new(&self,tokens: vec<TOKEN>){
+    pub fn new(tokens: Vec<Token>) -> Self {
         return Parser {
             index: 0,
             tokens
         }
     }
 
-    pub fn parse(&self,tokens: vec<TOKEN>) {
-        
-    }
-
-
-    fn advance(&self) -> TOKEN {
-        let token = self.tokens[self.index];
-        self.index++;
-        return token;
-    }
-
-    fn peek(){
-        return self.tokens[self.index];
-    }
-
-
-    fn binOP(&self){
-        let mut binOP = BinOP{};
-        binOP.left = self.term();
-        binOP.op = self.advance();
-        if(binOP.op.type_ == TOKEN::MUL) {
-            binOP.op.rigth = self.binOP();
-            return binOP;
+    pub fn parse(&mut self) -> Result<Box<Expr>,CustomError> {
+        let expr = self.binOP();
+        if self.peek().type_ != TOKENS::EOF {
+            return Err(error(ErrorKind::IllegalSyntax,self.peek().ln,self.peek().col,self.peek().index,self.peek().value.len()));
         }
-        binOP.rigth = self.term();
-        return binOP;
+        return Ok(expr);
     }
 
-    fn term(&self, token: TOKEN){
-        if token.type_ == "Number" {
-            return NodeNumber {
+
+    fn advance(&mut self) -> Token {
+         let token = self.tokens[self.index].clone();
+        self.index += 1;
+        token
+    }
+
+    fn peek(&self) -> Token {
+        return self.tokens[self.index].clone();
+    }
+
+
+    fn binOP(&mut self) -> Box<Expr> {
+        let mut left = self.term();
+        while self.peek().type_ == TOKENS::PLUS {
+            let op = self.advance().type_;
+            let rigth = self.term();
+            left = Box::new(Expr::BinOP{
+                left,
+                rigth,
+                op
+            });
+        }
+        return left
+    }
+
+    fn term(&mut self) -> Box<Expr> {
+        let mut left = self.atom();
+        while self.peek().type_ == TOKENS::MUL {
+            let op = self.advance().type_;
+            let rigth = self.atom();
+            left = Box::new(Expr::BinOP{
+                left,
+                rigth,
+                op
+            });
+        }
+        return left;
+    }
+
+    fn atom(&mut self) -> Box<Expr> {
+        let token = self.peek();
+        if token.type_ == TOKENS::NUMBER {
+            self.advance();
+            return Box::new(Expr::Number {
                 ln: token.ln,
                 col: token.col,
-                value: token.value.parse::<f64>().wrap()
-            }
+                value: token.value
+            })
         }
-        self.advance();
+        return Box::new(Expr::Number{
+            ln: 0,
+            col: 0,
+            value: "1".to_string()
+        });
     }
 }

@@ -3,8 +3,8 @@ use std::sync::LazyLock;
 use crate::share::code::CODE;
 use crate::vm::error::error::{CustomError, ErrorKind, error};
 
-#[derive(Debug)]
-enum TOKENS {
+#[derive(Debug,PartialEq,Clone)]
+pub enum TOKENS {
     PLUS,
     MiNUS,
     MUL,
@@ -15,16 +15,17 @@ enum TOKENS {
     GT,
     LTE,
     GTE,
-    EE
+    EE,
+    EOF
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct Token {
-    type_: TOKENS,
-    value: String,
-    ln: usize,
-    col: usize,
-    index: usize,
+    pub type_: TOKENS,
+    pub value: String,
+    pub ln: usize,
+    pub col: usize,
+    pub index: usize,
 }
 
 #[derive(Debug)]
@@ -83,6 +84,7 @@ impl Lexer {
                 return Some(error(ErrorKind::IllegalCharacter, self.ln, self.col, self.index, 1));
             }
         }
+        self.create_token("", TOKENS::EOF);
         None
     }
 
