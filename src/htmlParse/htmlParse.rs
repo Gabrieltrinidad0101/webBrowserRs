@@ -4,6 +4,8 @@ use std::collections::HashMap;
 
 struct html_parse {
     index int32,
+    html: html
+    htmls: Vec<html>
 }
 
 
@@ -73,12 +75,13 @@ impl html_parse {
             self.advance_space();
             let current_label = "";
             if self.peek() == b'<' {
-                self.advance();
+                self.advance_space();
                 current_label = self.get_label();
                 self.advance_space();
-
                 let properties = self.get_properties();
             }
+            self.advance_space();
+            self.advance();
         }
     }
 }

@@ -84,7 +84,7 @@ impl Lexer {
                 return Some(error(ErrorKind::IllegalCharacter, self.ln, self.col, self.index, 1));
             }
         }
-        self.create_token("", TOKENS::EOF);
+        self.create_token("_", TOKENS::EOF);
         None
     }
 
@@ -148,13 +148,13 @@ impl Lexer {
                     _ => None,
                 };
                 if let Some(t2) = token2 {
-                    self.create_token("",t2);
+                    self.create_token("_",t2);
                     self.advance();
                     self.advance();
                     return
                 } 
             }
-            self.create_token("",t);
+            self.create_token("_",t);
             self.advance();
         }
     }

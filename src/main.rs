@@ -6,7 +6,7 @@ use crate::vm::lexer::lexer::Lexer;
 use crate::vm::parser::parser::Parser;
 
 fn main() {
-    *CODE.write().unwrap() = b"1 * 2 * 3 + 2  - - 5".to_vec();
+    *CODE.write().unwrap() = b"1 * 2 * 3 + 2 * 5".to_vec();
     let mut lexer = Lexer::new();
     if let Some(err) = lexer.tokenize() {
         println!("Error: {:#?}", err.kind);
@@ -24,3 +24,8 @@ fn main() {
         }
 }
 }
+
+
+// push 10
+// push 20
+// add
