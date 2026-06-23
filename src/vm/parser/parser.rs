@@ -48,7 +48,7 @@ impl Parser {
 
 
     fn advance(&mut self) -> Token {
-         let token = self.tokens[self.index].clone();
+        let token = self.tokens[self.index].clone();
         self.index += 1;
         token
     }

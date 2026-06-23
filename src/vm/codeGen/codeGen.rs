@@ -1,40 +1,36 @@
 use crate::vm::parser::parser::Expr;
 
 
-struct Command {
-    command: String,
-    value: i32,
+#[derive(Debug)]
+pub enum Command {
+    command(String),
+    value(i32),
 }
 
-struct code_gen{
-    expr: Expr
-    code: Vec<Command>
+#[derive(Debug)]
+pub struct CodeGen{
+    pub code: Vec<Command>
 }
 
 
-impl code_gen {
+impl CodeGen {
     pub fn new() -> Self {
-        return code_gen{
-            expr
+        return CodeGen{
+            code: Vec::new()
         }
     }
 
-    generate(&mut self,expr: Expr){
-        match expr {
-            Expr::BinOP => {
-                self.generate(expr.rigth);
-                self.generate(expr.left);
-                self.generate(expr.op);
+
+    pub fn generate(&mut self,expr: Box<Expr>){
+        match *expr {
+            Expr::BinOP{ left, rigth, op } => {
+                self.generate(rigth);
+                self.generate(left);
+                self.code.push(Command::command(format!("{:?}", op)));
+
             },
-            Expr::BinOP => {
-                self.generate(expr.rigth);
-                self.generate(expr.left);
-                self.generate(expr.op);
-            },
-            Expr::BinOP => {
-                self.generate(expr.rigth);
-                self.generate(expr.left);
-                self.generate(expr.op);
+            Expr::Number{value, ..} => {
+                self.code.push(Command::command(value));
             }
         }
     }
