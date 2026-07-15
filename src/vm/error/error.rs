@@ -22,7 +22,7 @@ pub fn error(kind: ErrorKind, ln: usize, col: usize, idx: usize, len: usize) -> 
         ErrorKind::IllegalCharacter => "Illegal character",
         ErrorKind::IllegalSyntax => "Illegal Syntax"
     };
-    let error = format!("\n{}{}", " ".repeat(col -1), "^".repeat(len));
+    let error = format!("\n{}{}", " ".repeat(col - 1 - len), "^".repeat(len));
     let code = CODE.read().unwrap();
     let mut show_error: String = (code[idx] as char).to_string();
     let mut index_back: usize = idx - 1;

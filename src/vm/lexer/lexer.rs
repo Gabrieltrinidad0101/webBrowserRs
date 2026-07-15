@@ -6,10 +6,12 @@ use crate::vm::error::error::{CustomError, ErrorKind, error};
 #[derive(Debug,PartialEq,Clone)]
 pub enum TOKENS {
     PLUS,
-    MiNUS,
+    Minus,
     MUL,
     DIV,
     NUMBER,
+    RPAREN,
+    LPAREN,
     EQ,
     LT,
     GT,
@@ -130,11 +132,14 @@ impl Lexer {
         let Some(ch) = self.peek() else { return };
         let token = match ch {
             b'+' => Some(TOKENS::PLUS),
-            b'-' => Some(TOKENS::MiNUS),
+            b'-' => Some(TOKENS::Minus),
             b'*' => Some(TOKENS::MUL),
+            b'/' => Some(TOKENS::DIV),
             b'>' => Some(TOKENS::GT),
             b'<' => Some(TOKENS::LT),
             b'=' => Some(TOKENS::EQ),
+            b'(' => Some(TOKENS::LPAREN),
+            b')' => Some(TOKENS::RPAREN),
             _ => None,
         };
 

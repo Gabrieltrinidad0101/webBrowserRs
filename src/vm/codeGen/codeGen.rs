@@ -1,15 +1,15 @@
 use crate::vm::parser::parser::Expr;
 
 
-#[derive(Debug)]
-pub enum Command {
-    command(String),
-    value(i32),
+#[derive(Debug,Clone)]
+pub enum OpCommand {
+    Command(String),
+    Value(f64),
 }
 
 #[derive(Debug)]
 pub struct CodeGen{
-    pub code: Vec<Command>
+    pub code: Vec<OpCommand>
 }
 
 
@@ -20,19 +20,25 @@ impl CodeGen {
         }
     }
 
-
-    pub fn generate(&mut self,expr: Box<Expr>){
+    fn generate_(&mut self,expr: Box<Expr>){
         match *expr {
             Expr::BinOP{ left, rigth, op } => {
-                self.generate(rigth);
-                self.generate(left);
-                self.code.push(Command::command(format!("{:?}", op)));
+                self.generate_(rigth);
+                self.generate_(left);
+                self.code.push(OpCommand::Command(format!("{:?}", op)));
 
             },
             Expr::Number{value, ..} => {
-                self.code.push(Command::command(value));
+                let num: f64 = value.parse().unwrap();
+                self.code.push(OpCommand::Value(num));
             }
         }
+    }
+
+
+    pub fn generate(&mut self,expr: Box<Expr>){
+        self.generate_(expr);
+        self.code.push(OpCommand::Command("HALT".to_string()));
     }
 
 

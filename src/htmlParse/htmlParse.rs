@@ -22,7 +22,6 @@ impl html_parse {
         return  html_parse{
             index: 0
         }
-
     }
 
     fn advance(&mut self) -> u8 {
@@ -42,7 +41,7 @@ impl html_parse {
                 self.advance();
                 continue;
             }
-            break
+            break;
         }
     }
 
