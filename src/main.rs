@@ -1,15 +1,19 @@
 mod render;
 mod share;
 mod vm;
+mod htmlParse;
 
 use crate::share::code::CODE;
 use crate::vm::lexer::lexer::Lexer;
 use crate::vm::parser::parser::Parser;
 use crate::vm::codeGen::codeGen::CodeGen;
 use crate::vm::vm::vm::VM;
+use crate::htmlParse::htmlParse::HtmlParse;
 
 fn main() {
-    render::render::run();
+   let mut htmlParse = HtmlParse::new("<h1>hola</h1>".to_string());
+   htmlParse.parse();
+   println!("{:#?}", htmlParse.html);
 }
 
 #[allow(dead_code)]

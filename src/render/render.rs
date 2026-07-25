@@ -1,12 +1,7 @@
-use glium::implement_vertex;
 use glium::Surface;
 use glium::winit::event::{Event, WindowEvent};
-
-#[derive(Copy, Clone)]
-struct Vertex {
-    position: [f32; 2],
-}
-implement_vertex!(Vertex, position);
+use glium::uniform;
+use crate::render::shapes::Shapes;
 
 pub fn run() {
     let event_loop = glium::winit::event_loop::EventLoop::builder()
@@ -18,30 +13,30 @@ pub fn run() {
         .with_inner_size(800, 600)
         .build(&event_loop);
 
-    let square = vec![
-        Vertex { position: [-0.5, -0.5] },
-        Vertex { position: [ 0.5, -0.5] },
-        Vertex { position: [-0.5,  0.5] },
-        Vertex { position: [ 0.5,  0.5] },
-    ];
-    let vertex_buffer = glium::VertexBuffer::new(&display, &square).unwrap();
+    let mut shapes = Shapes::new();
+    shapes.square(&display,10.0, 10.0, 20.0, 20.0, [0.2f32, 0.7, 1.0, 1.0]);
+    shapes.square(&display,30.0, 30.0, 20.0, 20.0, [0.2f32, 0.7, 1.0, 1.0]);
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TriangleStrip);
 
     let vertex_shader = r#"
         #version 140
         in vec2 position;
+        uniform vec2 u_resolution;
         void main() {
-            gl_Position = vec4(position, 0.0, 1.0);
+            // píxeles -> NDC (-1..1), con origen arriba-izquierda
+            vec2 ndc = (position / u_resolution) * 2.0 - 1.0;
+            gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
         }
     "#;
 
     let fragment_shader = r#"
-        #version 140
-        out vec4 color;
-        void main() {
-            color = vec4(0.2, 0.7, 1.0, 1.0);
-        }
-    "#;
+    #version 140
+    out vec4 color;
+    uniform vec4 u_color;    // ← viene desde Rust
+    void main() {
+        color = u_color;
+    }
+"#;
 
     let program =
         glium::Program::from_source(&display, vertex_shader, fragment_shader, None).unwrap();
@@ -54,15 +49,21 @@ pub fn run() {
                 WindowEvent::RedrawRequested => {
                     let mut frame = display.draw();
                     frame.clear_color(0.1, 0.1, 0.1, 1.0);
-                    frame
-                        .draw(
-                            &vertex_buffer,
-                            &indices,
-                            &program,
-                            &glium::uniforms::EmptyUniforms,
-                            &Default::default(),
-                        )
-                        .unwrap();
+
+                    let (width, height) = display.get_framebuffer_dimensions();
+                    let resolution = [width as f32, height as f32];
+
+                    for shape in &shapes.shapes {
+                        frame
+                            .draw(
+                                &shape.vertex_buffer,
+                                &indices,
+                                &program,
+                                &uniform! { u_color: shape.color, u_resolution: resolution },
+                                &Default::default(),
+                            )
+                            .unwrap();
+                    }
                     frame.finish().unwrap();
                 }
                 WindowEvent::Resized(size) => display.resize(size.into()),

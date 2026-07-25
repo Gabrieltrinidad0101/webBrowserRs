@@ -1,43 +1,52 @@
-use crate::share::code::HTML_CODE;
 use std::collections::HashMap;
 
 
-struct html_parse {
-    index int32,
-    html: html
-    htmls: Vec<html>
+pub struct HtmlParse {
+    index: usize,
+    pub html: html,
+    htmls: Vec<html>,
+    html_code: String
 }
 
 
-struct html {
+#[derive(Debug)]
+pub struct html {
     tag: String,
-    properties: HashMap,
+    properties: HashMap<String,String>,
     children: Vec<html>
 }
 
 
-impl html_parse {
-
-    pub new(&self) => &self{
-        return  html_parse{
-            index: 0
+impl HtmlParse {
+    
+    pub fn new(html_code: String) -> Self{
+        return  HtmlParse{
+            index: 0,
+            html_code,
+            htmls: Vec::new(),
+            html: html {
+                tag: "root".to_string(),
+                properties: HashMap::new(),
+                children: Vec::new()
+            }
         }
     }
 
     fn advance(&mut self) -> u8 {
-        let chart = CODE.read().unwrap()[self.index];
+        let chart = self.html_code.as_bytes()[self.index];
         self.index += 1;
         return chart;
     }
 
-    fn peek(&self) -> Option<u8> {
-        HTML_CODE.read().unwrap().get(self.index).copied()
+    fn peek(&self) -> Option<char> {
+        self.html_code.chars().nth(self.index)
     }
 
 
-    fn advance_space(){
+    fn advance_space(&mut self){
         loop {
-            if chart == b'\n' || chart == b'\r' || chart == b'\t' || chart == b' ' {
+            let chart = self.peek();
+            if chart == Some('\n') || chart == Some('\r') || chart == Some('\t') || chart == Some(' ') {
                 self.advance();
                 continue;
             }
@@ -45,18 +54,21 @@ impl html_parse {
         }
     }
 
-    fn get_label() -> &str {
-        let current_label = "";
-        while self.peek() != b' ' || self.peek() != b'>' || self.peek() != b'=' || self.peek() != b'"' {
-            current_label += self.peek().to_string(); 
+    fn get_label(&mut self) -> String {
+        let mut current_label = String::new();
+        while let Some(chart) = self.peek() {
+            if chart == ' ' || chart == '>' || chart == '=' || chart == '"' {
+                break;
+            }
+            current_label.push(chart);
             self.advance();
         }
         return current_label
     }
 
-    fn get_properties(&self) -> HashMap {
-        let mut properties = HashMap::new();
-        while self.peek() != b'>' {
+    fn get_properties(&mut self) -> HashMap<String,String> {
+        let mut properties = HashMap::<String,String>::new();
+        while self.peek() != Some('>') {
             let property = self.get_label();
             self.advance_space();
             self.advance(); // to-do
@@ -69,11 +81,11 @@ impl html_parse {
         return properties;
     }
 
-    pub fn parse(&self) -> html {
+    pub fn parse(&mut self) {
         while let Some(chart) = self.peek()  {
             self.advance_space();
-            let current_label = "";
-            if self.peek() == b'<' {
+            let mut current_label = String::new();
+            if self.peek() == Some('<') {
                 self.advance_space();
                 current_label = self.get_label();
                 self.advance_space();
