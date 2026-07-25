@@ -4,7 +4,7 @@ use std::collections::HashMap;
 pub struct HtmlParse {
     index: usize,
     pub html: html,
-    htmls: Vec<html>,
+    htmls: Vec<*mut html>,
     html_code: String
 }
 
@@ -56,8 +56,8 @@ impl HtmlParse {
 
     fn get_label(&mut self) -> String {
         let mut current_label = String::new();
-        while let Some(chart) = self.peek() {
-            if chart == ' ' || chart == '>' || chart == '=' || chart == '"' {
+        while let Some(chart) = self.peek()  {
+            if (chart == ' ' || chart == '>' || chart == '=' || chart == '"') && self.index < self.html_code.len() {
                 break;
             }
             current_label.push(chart);
@@ -82,17 +82,49 @@ impl HtmlParse {
     }
 
     pub fn parse(&mut self) {
+        let lastLabel = "";
+        self.htmls.push(&mut self.html);
+        let mut current: *mut html = &mut self.html;
         while let Some(chart) = self.peek()  {
             self.advance_space();
-            let mut current_label = String::new();
+            let mut tag = String::new();
             if self.peek() == Some('<') {
                 self.advance_space();
-                current_label = self.get_label();
+                self.advance();
+
+                if self.peek() == Some('/') {
+                    self.advance();
+                    self.get_label();
+                    self.advance_space();
+                    self.advance();
+                    self.advance_space();
+                    self.htmls.pop();
+                    current = *self.htmls.last().unwrap();
+                    continue;
+                }
+                
+                // println!("{:?} {:?}", self.index,self.html_code.len());
+                tag = self.get_label();
+                // unsafe { println!("{:#?} {:#?}", tag,(*current).tag); }
                 self.advance_space();
+                
                 let properties = self.get_properties();
+
+                let html = html {
+                    tag,
+                    properties,
+                    children: Vec::new()
+                };
+
+                unsafe {
+                    (*current).children.push(html);
+                    current = (*current).children.last_mut().unwrap();
+                    self.htmls.push(current);
+                }
             }
             self.advance_space();
             self.advance();
+
         }
     }
 }

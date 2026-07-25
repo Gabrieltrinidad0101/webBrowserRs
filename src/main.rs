@@ -11,7 +11,21 @@ use crate::vm::vm::vm::VM;
 use crate::htmlParse::htmlParse::HtmlParse;
 
 fn main() {
-   let mut htmlParse = HtmlParse::new("<h1>hola</h1>".to_string());
+   let mut htmlParse = HtmlParse::new(r#"
+    <h2>
+        <h2></h2>
+        <h3></h3>
+    </h2>
+    <h2></h2>
+    <h3></h3>
+    <h3>
+        <h2></h2>
+        <h3></h3>
+    </h3>
+    <h3></h3>
+    <h3></h3>
+    <h3></h3>
+   "#.to_string());
    htmlParse.parse();
    println!("{:#?}", htmlParse.html);
 }
