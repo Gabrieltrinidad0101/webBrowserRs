@@ -11,8 +11,8 @@ pub struct HtmlParse {
 
 #[derive(Debug)]
 pub struct html {
-    tag: String,
-    properties: HashMap<String,String>,
+    pub tag: String,
+    pub properties: HashMap<String,String>,
     children: Vec<html>
 }
 
@@ -20,7 +20,7 @@ pub struct html {
 impl HtmlParse {
     
     pub fn new(html_code: String) -> Self{
-        return  HtmlParse{
+        HtmlParse{
             index: 0,
             html_code,
             htmls: Vec::new(),
