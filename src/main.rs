@@ -10,6 +10,7 @@ use crate::vm::parser::parser::Parser;
 use crate::vm::codeGen::codeGen::CodeGen;
 use crate::vm::vm::vm::VM;
 use crate::htmlParse::htmlParse::HtmlParse;
+use crate::cssParse::cssParse::CssParse;
 
 fn main() {
    let mut htmlParse = HtmlParse::new(r#"
@@ -28,7 +29,17 @@ fn main() {
     <h3></h3>
    "#.to_string());
    htmlParse.parse();
+
+    let mut cssParse = CssParse::new(r#"
+    .h1 {
+        width: 10px;
+        heigth: 10px;
+        background: red;
+    }
+    "#.to_string());
+   let css = cssParse.parse();
    println!("{:#?}", htmlParse.html);
+   println!("{:#?}", css);
 }
 
 #[allow(dead_code)]

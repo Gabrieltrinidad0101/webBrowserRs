@@ -18,7 +18,7 @@ pub struct html {
 
 
 impl HtmlParse {
-    
+
     pub fn new(html_code: String) -> Self{
         HtmlParse{
             index: 0,
@@ -32,9 +32,11 @@ impl HtmlParse {
         }
     }
 
-    fn advance(&mut self) -> u8 {
-        let chart = self.html_code.as_bytes()[self.index];
-        self.index += 1;
+    fn advance(&mut self) -> Option<char> {
+        let chart = self.peek();
+        if chart.is_some() {
+            self.index += 1;
+        }
         return chart;
     }
 
@@ -68,7 +70,10 @@ impl HtmlParse {
 
     fn get_properties(&mut self) -> HashMap<String,String> {
         let mut properties = HashMap::<String,String>::new();
-        while self.peek() != Some('>') {
+        while let Some(chart) = self.peek() {
+            if chart == '>' {
+                break;
+            }
             let property = self.get_label();
             self.advance_space();
             self.advance(); // to-do
@@ -82,12 +87,10 @@ impl HtmlParse {
     }
 
     pub fn parse(&mut self) {
-        let lastLabel = "";
         self.htmls.push(&mut self.html);
         let mut current: *mut html = &mut self.html;
-        while let Some(chart) = self.peek()  {
+        while self.peek().is_some()  {
             self.advance_space();
-            let mut tag = String::new();
             if self.peek() == Some('<') {
                 self.advance_space();
                 self.advance();
@@ -99,15 +102,17 @@ impl HtmlParse {
                     self.advance();
                     self.advance_space();
                     self.htmls.pop();
-                    current = *self.htmls.last().unwrap();
+                    if let Some(parent) = self.htmls.last() {
+                        current = *parent;
+                    }
                     continue;
                 }
-                
+
                 // println!("{:?} {:?}", self.index,self.html_code.len());
-                tag = self.get_label();
+                let tag = self.get_label();
                 // unsafe { println!("{:#?} {:#?}", tag,(*current).tag); }
                 self.advance_space();
-                
+
                 let properties = self.get_properties();
 
                 let html = html {
@@ -118,7 +123,10 @@ impl HtmlParse {
 
                 unsafe {
                     (*current).children.push(html);
-                    current = (*current).children.last_mut().unwrap();
+                    current = (*current)
+                        .children
+                        .last_mut()
+                        .expect("children is not empty: the node was just pushed");
                     self.htmls.push(current);
                 }
             }
@@ -128,9 +136,3 @@ impl HtmlParse {
         }
     }
 }
-
-
-
-
-
-
